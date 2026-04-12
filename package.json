@@ -1,0 +1,23 @@
+{
+  "name": "observer-quantum-world",
+  "version": "0.1.0",
+  "description": "A minimal quantum world model where physics emerges from observer consistency requirements",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo/main.ts",
+    "dev": "tsx watch demo/main.ts"
+  },
+  "keywords": [
+    "quantum",
+    "observer",
+    "consistency",
+    "physics",
+    "simulation"
+  ],
+  "author": "Ronan",
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
