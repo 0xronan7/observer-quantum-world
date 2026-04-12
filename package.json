@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "demo": "tsx demo/main.ts",
-    "dev": "tsx watch demo/main.ts"
+    "dev": "tsx watch demo/main.ts",
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [
     "quantum",
@@ -18,6 +21,10 @@
   "license": "MIT",
   "devDependencies": {
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^8.0.8"
+  },
+  "dependencies": {
+    "pixi.js": "^7.4.3"
   }
 }
