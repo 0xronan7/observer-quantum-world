@@ -492,7 +492,7 @@ class QuantumWorldApp {
     }
   }
 
-  private async runEntanglementScenario(): Promise<void() {
+  private async runEntanglementScenario(): Promise<void> {
     this.reset();
     this.currentScenario = 'entangle';
     
