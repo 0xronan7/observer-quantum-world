@@ -774,6 +774,28 @@ function updateStats(): void {
   }
 }
 
+/**
+ * Display git commit hash from Vite build
+ */
+function displayVersion(): void {
+  // Vite injects __GIT_COMMIT_HASH__ during build
+  const versionEl = document.getElementById('stat-version');
+  if (!versionEl) return;
+  
+  // @ts-ignore - Vite defines this at build time
+  const hash = typeof __GIT_COMMIT_HASH__ !== 'undefined' ? __GIT_COMMIT_HASH__ : 'dev';
+  
+  if (hash === 'dev' || !hash) {
+    versionEl.textContent = 'dev';
+    versionEl.style.color = '#888';
+  } else {
+    const shortHash = hash.substring(0, 7);
+    versionEl.textContent = shortHash;
+    versionEl.style.color = '#00ff00';
+    versionEl.title = `Commit: ${hash}`;
+  }
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -785,4 +807,5 @@ function sleep(ms: number): Promise<void> {
 window.addEventListener('load', () => {
   const app = new NetworkedQuantumApp();
   (window as any).quantumApp = app;
+  displayVersion();
 });
