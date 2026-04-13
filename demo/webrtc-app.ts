@@ -44,6 +44,7 @@ interface ParticleData {
 const CONFIG = {
   colors: {
     background: 0x0a0a0f,
+    text: 0xe0e0e0,
     myObserver: 0x00ffff,
     peerObserver: 0xff00ff,
     observerInconsistent: 0xff6600,
