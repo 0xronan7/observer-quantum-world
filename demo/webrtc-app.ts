@@ -614,28 +614,34 @@ class WebRTCQuantumApp {
   }
 
   private createParticle(x: number, y: number): ParticleVisual {
-    const particle = this.world.createParticle({ spin: ['up', 'down'] });
-    const visual = new ParticleVisual(particle, x, y, this.app);
-    this.particles.push(visual);
-    
-    // Broadcast to peers
-    this.broadcast({
-      type: 'particle-created',
-      payload: {
-        id: particle.id,
-        x: x,
-        y: y,
-        isCollapsed: false,
-        value: null,
-      },
-      senderId: window.myPeerId,
-      timestamp: Date.now(),
-    });
-    
-    updateStats();
-    log(`Created particle at (${Math.round(x)}, ${Math.round(y)})`, 'quantum');
-    
-    return visual;
+    try {
+      const particle = this.world.createParticle({ spin: ['up', 'down'] });
+      const visual = new ParticleVisual(particle, x, y, this.app);
+      this.particles.push(visual);
+      
+      // Broadcast to peers
+      this.broadcast({
+        type: 'particle-created',
+        payload: {
+          id: particle.id,
+          x: x,
+          y: y,
+          isCollapsed: false,
+          value: null,
+        },
+        senderId: window.myPeerId,
+        timestamp: Date.now(),
+      });
+      
+      updateStats();
+      log(`Created particle at (${Math.round(x)}, ${Math.round(y)})`, 'quantum');
+      
+      return visual;
+    } catch (error) {
+      log(`Error creating particle: ${error}`, 'warning');
+      console.error(error);
+      throw error;
+    }
   }
 
   private updateAllConnections(): void {
@@ -792,9 +798,15 @@ class WebRTCQuantumApp {
     };
 
     document.getElementById('btn-create-particle')!.onclick = () => {
+      log('Creating particle...', 'info');
       const x = window.innerWidth / 2 + (Math.random() - 0.5) * 400;
       const y = window.innerHeight / 2 + (Math.random() - 0.5) * 300;
-      this.createParticle(x, y);
+      try {
+        this.createParticle(x, y);
+        log('✓ Particle created successfully', 'success');
+      } catch (error) {
+        log(`✗ Failed to create particle: ${error}`, 'warning');
+      }
     };
 
     document.getElementById('btn-measure-all')!.onclick = () => {
@@ -896,10 +908,9 @@ class WebRTCQuantumApp {
   private enableControls(): void {
     const buttons = document.querySelectorAll('#controls button');
     buttons.forEach(btn => {
-      if (btn.id !== 'btn-clear') {
-        (btn as HTMLButtonElement).disabled = false;
-      }
+      (btn as HTMLButtonElement).disabled = false;
     });
+    log('Controls enabled - you can create observers and particles!', 'success');
   }
 
   private reset(): void {
