@@ -463,6 +463,9 @@ class NetworkedQuantumApp {
       nearestObserver.setMeasured(result);
       nearestObserver.highlight();
       
+      // Collapse particle immediately on measurement
+      particleVisual.collapse(result);
+      
       log(`  Result: ${result}`, 'info');
       
       // Update consistency state
@@ -478,11 +481,14 @@ class NetworkedQuantumApp {
 
   private updateConsistencyState(): void {
     for (const obs of this.observers) {
-      const consistent = obs.observer.isConsistentWithNeighbors(
-        this.particles[0]?.particle,
-        'spin'
-      );
-      obs.setConsistent(consistent);
+      // Check consistency for each particle
+      for (const particleVisual of this.particles) {
+        const consistent = obs.observer.isConsistentWithNeighbors(
+          particleVisual.particle,
+          'spin'
+        );
+        obs.setConsistent(obs.isConsistent && consistent);
+      }
     }
   }
 
@@ -519,9 +525,9 @@ class NetworkedQuantumApp {
       log('⚠️  Max iterations reached', 'warning');
     }
 
-    // Update particle visual
+    // Update particle visual (already collapsed on measurement)
     const value = this.observers[0]?.observer.getCached(particleVisual.particle, 'spin');
-    if (value) {
+    if (value && !particleVisual.value) {
       particleVisual.collapse(value);
     }
 
@@ -545,15 +551,25 @@ class NetworkedQuantumApp {
       // Each observer measures nearest particle
       for (const obs of this.observers) {
         const nearestParticle = this.findNearestParticle(obs);
-        if (nearestParticle && !nearestParticle.isCollapsed) {
+        if (nearestParticle && !obs.isMeasured) {
           const result = obs.observer.measure(nearestParticle.particle, 'spin');
           obs.setMeasured(result);
           obs.highlight();
+          
+          // Collapse particle immediately
+          nearestParticle.collapse(result);
         }
       }
       
       this.updateConsistencyState();
       log('All observers measured', 'info');
+      
+      // Auto-propagate after measurement
+      if (this.observers.length > 1 && this.particles.length > 0 && !this.isPropagating) {
+        setTimeout(() => {
+          this.propagateConsistency(this.particles[0]);
+        }, 500);
+      }
     };
 
     document.getElementById('btn-propagate')!.onclick = () => {
