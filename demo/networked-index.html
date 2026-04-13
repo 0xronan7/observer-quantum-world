@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Observer Quantum World - Interactive Demo</title>
+  <title>Networked Quantum World</title>
   <style>
     * {
       margin: 0;
@@ -27,30 +27,30 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       padding: 20px;
       border-radius: 10px;
       border: 1px solid #333;
-      max-width: 400px;
+      max-width: 380px;
       z-index: 100;
+      font-size: 12px;
     }
     
     #ui-overlay h1 {
-      font-size: 18px;
-      margin-bottom: 15px;
+      font-size: 16px;
+      margin-bottom: 12px;
       color: #00ffff;
     }
     
     #ui-overlay h2 {
-      font-size: 14px;
-      margin: 15px 0 10px 0;
+      font-size: 13px;
+      margin: 12px 0 8px 0;
       color: #ff00ff;
     }
     
     #ui-overlay p {
-      font-size: 12px;
-      line-height: 1.6;
-      margin-bottom: 10px;
+      line-height: 1.5;
+      margin-bottom: 8px;
     }
     
     #ui-overlay .highlight {
@@ -70,18 +70,21 @@
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
       z-index: 100;
+      max-width: 90%;
     }
     
     button {
       background: #1a1a2e;
       color: #00ffff;
       border: 1px solid #00ffff;
-      padding: 10px 20px;
+      padding: 10px 16px;
       border-radius: 5px;
       cursor: pointer;
       font-family: 'Courier New', monospace;
-      font-size: 14px;
+      font-size: 13px;
       transition: all 0.3s;
     }
     
@@ -95,13 +98,18 @@
       cursor: not-allowed;
     }
     
+    button.active {
+      background: #00ffff;
+      color: #000;
+    }
+    
     #log {
       position: absolute;
       bottom: 20px;
       right: 20px;
-      width: 400px;
-      height: 200px;
-      background: rgba(0, 0, 0, 0.8);
+      width: 350px;
+      height: 180px;
+      background: rgba(0, 0, 0, 0.85);
       border: 1px solid #333;
       border-radius: 10px;
       padding: 10px;
@@ -111,8 +119,8 @@
     }
     
     #log .entry {
-      margin-bottom: 5px;
-      padding: 3px;
+      margin-bottom: 4px;
+      padding: 2px 0;
       border-left: 2px solid #333;
       padding-left: 8px;
     }
@@ -133,20 +141,24 @@
       border-left-color: #ff00ff;
     }
     
+    #log .entry.network {
+      border-left-color: #ffff00;
+    }
+    
     #status-bar {
       position: absolute;
       top: 20px;
       right: 20px;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       padding: 15px;
       border-radius: 10px;
       border: 1px solid #333;
       z-index: 100;
+      font-size: 12px;
     }
     
     #status-bar .stat {
-      margin-bottom: 8px;
-      font-size: 12px;
+      margin-bottom: 6px;
     }
     
     #status-bar .stat:last-child {
@@ -161,40 +173,60 @@
       color: #00ffff;
       font-weight: bold;
     }
+    
+    #mode-selector {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .mode-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
   </style>
-  <script type="module" crossorigin src="/observer-quantum-world/assets/main-CXbHGtDU.js"></script>
-  <link rel="modulepreload" crossorigin href="/observer-quantum-world/assets/Particle-BogZtYuG.js">
 </head>
 <body>
   <div id="canvas-container"></div>
   
+  <div id="mode-selector">
+    <button class="mode-btn active" data-mode="free">Free Mode</button>
+    <button class="mode-btn" data-mode="grid">Grid Mode</button>
+    <button class="mode-btn" data-mode="game">Game of Life</button>
+  </div>
+  
   <div id="ui-overlay">
-    <h1>🌌 Observer Quantum World</h1>
+    <h1>🌌 Networked Quantum World</h1>
     
-    <p>Click on <span class="highlight">empty space</span> to create observers.</p>
+    <p><span class="highlight">Click empty space</span> to create observers</p>
     
-    <p>Click on <span class="highlight">particles</span> to measure them.</p>
+    <p><span class="highlight">Click particles</span> to measure</p>
     
-    <h2>Quantum Regime</h2>
-    <p>Single observer = superposition persists. Reality is observer-relative.</p>
+    <h2>Network Dynamics</h2>
+    <p>Observers connect to <span class="highlight">nearby neighbors</span> (yellow lines)</p>
     
-    <h2>Classical Regime</h2>
-    <p>Multiple observers = consistency required. <span class="warning">Collapse emerges!</span></p>
+    <p>Consistency propagates as <span class="warning">waves</span> through network</p>
     
-    <h2>Controls</h2>
-    <p>Use buttons below to run scenarios.</p>
+    <h2>Key Insight</h2>
+    <p>Classical reality emerges from <span class="highlight">local agreements</span></p>
+    
+    <p>No instant collapse - information has finite speed!</p>
   </div>
   
   <div id="controls">
-    <button id="btn-single">1. Single Observer</button>
-    <button id="btn-double">2. Two Observers</button>
-    <button id="btn-entangle">3. Entanglement</button>
-    <button id="btn-reset">Reset</button>
-    <a href="networked-index.html" style="text-decoration: none;">
-      <button style="margin-left: 20px; background: #2a2a3e; border-color: #ffff00; color: #ffff00;">
-        🌐 Networked Version →
-      </button>
-    </a>
+    <button id="btn-create-particle">+ Particle</button>
+    <button id="btn-measure-all">Measure All</button>
+    <button id="btn-propagate">Propagate Consistency</button>
+    <button id="btn-grid">Create Grid</button>
+    <button id="btn-clear">Clear</button>
   </div>
   
   <div id="status-bar">
@@ -207,12 +239,21 @@
       <span class="stat-value" id="stat-particles">0</span>
     </div>
     <div class="stat">
+      <span class="stat-label">Connections: </span>
+      <span class="stat-value" id="stat-connections">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Consistency: </span>
+      <span class="stat-value" id="stat-consistency">-</span>
+    </div>
+    <div class="stat">
       <span class="stat-label">Mode: </span>
-      <span class="stat-value" id="stat-mode">Quantum</span>
+      <span class="stat-value" id="stat-mode">Free</span>
     </div>
   </div>
   
   <div id="log"></div>
   
+  <script type="module" src="networked-app.ts"></script>
 </body>
 </html>
