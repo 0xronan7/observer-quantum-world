@@ -441,41 +441,40 @@ class NetworkedQuantumApp {
       return;
     }
 
-    // Find nearest observer
-    let nearestObserver: NetworkedObserverVisual | null = null;
-    let minDist = Infinity;
-
-    for (const obs of this.observers) {
+    // Find ALL observers within range of this particle (not just nearest)
+    const nearbyObservers = this.observers.filter(obs => {
       const dx = obs.container.x - particleVisual.container.x;
       const dy = obs.container.y - particleVisual.container.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      
-      if (dist < minDist) {
-        minDist = dist;
-        nearestObserver = obs;
-      }
+      return dist < CONFIG.network.defaultRadius; // Within communication radius
+    });
+
+    if (nearbyObservers.length === 0) {
+      log('No observers near this particle', 'warning');
+      return;
     }
 
-    if (nearestObserver) {
-      log(`${nearestObserver.observer.id} measuring particle...`, 'info');
-      
-      const result = nearestObserver.observer.measure(particleVisual.particle, 'spin');
-      nearestObserver.setMeasured(result);
-      nearestObserver.highlight();
-      
-      // Collapse particle immediately on measurement
-      particleVisual.collapse(result);
-      
-      log(`  Result: ${result}`, 'info');
-      
-      // Update consistency state
-      this.updateConsistencyState();
-      
-      // Auto-propagate if multiple observers
-      if (this.observers.length > 1 && !this.isPropagating) {
-        await sleep(500);
-        this.propagateConsistency(particleVisual);
-      }
+    log(`${nearbyObservers.length} observer(s) measuring particle...`, 'info');
+
+    // All nearby observers measure
+    for (const obs of nearbyObservers) {
+      const result = obs.observer.measure(particleVisual.particle, 'spin');
+      obs.setMeasured(result);
+      obs.highlight();
+      log(`  ${obs.observer.id}: ${result}`, 'info');
+    }
+
+    // Collapse particle immediately
+    const firstResult = nearbyObservers[0].observer.getCached(particleVisual.particle, 'spin');
+    particleVisual.collapse(firstResult);
+
+    // Update consistency state
+    this.updateConsistencyState();
+
+    // Auto-propagate if multiple observers
+    if (this.observers.length > 1 && !this.isPropagating) {
+      await sleep(500);
+      this.propagateConsistency(particleVisual);
     }
   }
 
@@ -548,21 +547,30 @@ class NetworkedQuantumApp {
         return;
       }
       
-      // Each observer measures nearest particle
+      log('All observers measuring all nearby particles...', 'info');
+      
+      // Each observer measures ALL particles within range
+      let totalMeasurements = 0;
       for (const obs of this.observers) {
-        const nearestParticle = this.findNearestParticle(obs);
-        if (nearestParticle && !obs.isMeasured) {
-          const result = obs.observer.measure(nearestParticle.particle, 'spin');
-          obs.setMeasured(result);
-          obs.highlight();
+        for (const particle of this.particles) {
+          const dx = particle.container.x - obs.container.x;
+          const dy = particle.container.y - obs.container.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
           
-          // Collapse particle immediately
-          nearestParticle.collapse(result);
+          if (dist < CONFIG.network.defaultRadius) {
+            const result = obs.observer.measure(particle.particle, 'spin');
+            obs.setMeasured(result);
+            obs.highlight();
+            
+            // Collapse particle immediately
+            particle.collapse(result);
+            totalMeasurements++;
+          }
         }
       }
       
       this.updateConsistencyState();
-      log('All observers measured', 'info');
+      log(`✓ ${totalMeasurements} measurements performed`, 'success');
       
       // Auto-propagate after measurement
       if (this.observers.length > 1 && this.particles.length > 0 && !this.isPropagating) {
