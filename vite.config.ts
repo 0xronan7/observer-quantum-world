@@ -19,6 +19,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         networked: 'networked-index.html',
+        webrtc: 'webrtc-index.html',
       },
     },
   },
